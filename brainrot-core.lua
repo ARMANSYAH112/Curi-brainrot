@@ -1,16 +1,19 @@
--- GUI Mengambang VOIZZ BLOD
 local player = game.Players.LocalPlayer
 
+-- GUI Utama
 local gui = Instance.new("ScreenGui", game.CoreGui)
 gui.Name = "VoizzBlodGUI"
 
-local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 230, 0, 270)
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 230, 0, 300)
 frame.Position = UDim2.new(0, 10, 0.4, 0)
 frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 frame.BorderSizePixel = 0
-frame.BackgroundTransparency = 0.1
+frame.Active = true
+frame.Draggable = true
+frame.Parent = gui
 
+-- Judul
 local title = Instance.new("TextLabel", frame)
 title.Text = "💀 VOIZZ BLOD 💀"
 title.Size = UDim2.new(1, 0, 0, 30)
@@ -19,56 +22,89 @@ title.TextColor3 = Color3.fromRGB(255, 0, 0)
 title.Font = Enum.Font.GothamBold
 title.TextSize = 20
 
--- Fungsi bikin tombol ON/OFF
-local function makeToggle(name, posY)
-    local state = false
-    local btn = Instance.new("TextButton", frame)
-    btn.Text = name .. " [OFF]"
-    btn.Size = UDim2.new(1, -20, 0, 30)
-    btn.Position = UDim2.new(0, 10, 0, posY)
-    btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    btn.TextColor3 = Color3.new(1, 1, 1)
-    btn.Font = Enum.Font.Gotham
-    btn.TextSize = 16
-    btn.BorderSizePixel = 0
+-- Tombol minimize/maximize
+local minimizeBtn = Instance.new("TextButton", frame)
+minimizeBtn.Size = UDim2.new(0, 30, 0, 30)
+minimizeBtn.Position = UDim2.new(1, -35, 0, 0)
+minimizeBtn.Text = "-"
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+minimizeBtn.TextColor3 = Color3.new(1, 1, 1)
+minimizeBtn.Font = Enum.Font.GothamBold
+minimizeBtn.TextSize = 18
 
-    btn.MouseButton1Click:Connect(function()
-        state = not state
-        btn.Text = name .. (state and " [ON]" or " [OFF]")
-        -- Tambahkan fungsi masing-masing toggle di sini
-        if name == "vps base orang" then
-            print("Base orang aktif: ", state)
-        elseif name == "vps timer base" then
-            print("Timer base aktif: ", state)
-        elseif name == "vps player" then
-            print("Player aktif: ", state)
-        elseif name == "tembus tembok" then
-            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                player.Character.HumanoidRootPart.CanCollide = not state
-            end
-        end
+-- Kontainer tombol (agar bisa disembunyikan)
+local container = Instance.new("Frame", frame)
+container.Position = UDim2.new(0, 0, 0, 30)
+container.Size = UDim2.new(1, 0, 1, -30)
+container.BackgroundTransparency = 1
+
+-- Status minimize
+local minimized = false
+minimizeBtn.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    container.Visible = not minimized
+    minimizeBtn.Text = minimized and "+" or "-"
+end)
+
+-- Fungsi buat toggle tombol
+local function makeToggle(name, orderY, callback)
+    local toggleState = false
+    local button = Instance.new("TextButton", container)
+    button.Size = UDim2.new(0, 200, 0, 30)
+    button.Position = UDim2.new(0, 15, 0, (orderY - 1) * 40)
+    button.Text = name .. " [OFF]"
+    button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    button.TextColor3 = Color3.new(1, 1, 1)
+    button.Font = Enum.Font.Gotham
+    button.TextSize = 16
+    button.BorderSizePixel = 0
+
+    button.MouseButton1Click:Connect(function()
+        toggleState = not toggleState
+        button.Text = name .. (toggleState and " [ON]" or " [OFF]")
+        if callback then callback(toggleState) end
     end)
 end
 
--- Buat semua toggle
-makeToggle("vps base orang", 40)
-makeToggle("vps timer base", 80)
-makeToggle("vps player", 120)
-makeToggle("tembus tembok", 160)
+-- Fungsi buat tombol biasa (contoh: teleport)
+local function makeButton(name, orderY, callback)
+    local button = Instance.new("TextButton", container)
+    button.Size = UDim2.new(0, 200, 0, 30)
+    button.Position = UDim2.new(0, 15, 0, (orderY - 1) * 40)
+    button.Text = name
+    button.BackgroundColor3 = Color3.fromRGB(70, 70, 255)
+    button.TextColor3 = Color3.new(1, 1, 1)
+    button.Font = Enum.Font.GothamBold
+    button.TextSize = 16
+    button.BorderSizePixel = 0
 
--- Tombol teleport ke tengah
-local teleBtn = Instance.new("TextButton", frame)
-teleBtn.Text = "Teleport ke Tengah"
-teleBtn.Size = UDim2.new(1, -20, 0, 30)
-teleBtn.Position = UDim2.new(0, 10, 0, 210)
-teleBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 255)
-teleBtn.TextColor3 = Color3.new(1, 1, 1)
-teleBtn.Font = Enum.Font.GothamBold
-teleBtn.TextSize = 16
-teleBtn.BorderSizePixel = 0
+    button.MouseButton1Click:Connect(callback)
+end
 
-teleBtn.MouseButton1Click:Connect(function()
-    if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        player.Character.HumanoidRootPart.CFrame = CFrame.new(0, 10, 0) -- ubah posisi tengah sesuai game
+-- 🟢 Semua tombol sekarang bisa diaktifkan!
+makeToggle("vps base orang", 1, function(state)
+    print("vps base orang: ", state)
+    -- Tambah fungsi kamu di sini
+end)
+
+makeToggle("vps timer base", 2, function(state)
+    print("vps timer base: ", state)
+    -- Tambah fungsi timer kamu di sini
+end)
+
+makeToggle("vps player", 3, function(state)
+    print("vps player: ", state)
+    -- Tambah fungsi player tracking
+end)
+
+makeToggle("tembus tembok", 4, function(state)
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        player.Character.HumanoidRootPart.CanCollide = not state
+    end
+end)
+
+makeButton("Teleport ke Tengah", 5, function()
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        player.Character.HumanoidRootPart.CFrame = CFrame.new(0, 10, 0)
     end
 end)
