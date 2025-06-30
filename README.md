@@ -1,0 +1,2 @@
+# Curi-brainrot
+SCRIPT STEAL BRAINROT 
